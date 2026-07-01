@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sahana Hub | Engineering Workspace</title>
+<meta name="description" content="Sahana R — Software Engineer, AI/ML &amp; Data Analytics. An interactive engineering hub / portfolio."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: { extend: {
+    colors: {
+      "on-secondary-fixed-variant":"#5516be","on-primary-fixed":"#001a42","on-background":"#e4e1e6","on-primary":"#002e6a",
+      "on-secondary-fixed":"#23005c","error":"#ffb4ab","surface-container-lowest":"#0e0e11","outline-variant":"#424754",
+      "on-tertiary-fixed":"#001f26","on-secondary":"#3c0091","on-error":"#690005","surface-variant":"#353438",
+      "error-container":"#93000a","on-surface":"#e4e1e6","tertiary-container":"#009eb9","outline":"#8c909f",
+      "inverse-primary":"#005ac2","primary":"#adc6ff","on-error-container":"#ffdad6","surface-tint":"#adc6ff",
+      "on-primary-fixed-variant":"#004395","inverse-on-surface":"#303033","primary-container":"#4d8eff",
+      "surface-container-highest":"#353438","on-secondary-container":"#c4abff","primary-fixed":"#d8e2ff",
+      "tertiary-fixed-dim":"#4cd7f6","surface-bright":"#39393c","on-tertiary-fixed-variant":"#004e5c",
+      "on-surface-variant":"#c2c6d6","secondary-container":"#571bc1","inverse-surface":"#e4e1e6","surface-dim":"#131316",
+      "surface":"#131316","tertiary":"#4cd7f6","secondary-fixed-dim":"#d0bcff","primary-fixed-dim":"#adc6ff",
+      "tertiary-fixed":"#acedff","on-tertiary":"#003640","surface-container-low":"#1b1b1e","secondary-fixed":"#e9ddff",
+      "surface-container":"#1f1f22","secondary":"#d0bcff","surface-container-high":"#2a2a2d","on-primary-container":"#00285d",
+      "on-tertiary-container":"#002f38","background":"#131316"
+    },
+    borderRadius:{sm:"0.125rem",DEFAULT:"0.25rem",md:"0.375rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},
+    spacing:{base:"4px",xs:"4px",sm:"8px",md:"16px",lg:"24px",xl:"40px","column-gap":"20px","max-width":"1440px"},
+    fontFamily:{
+      "label-caps":["JetBrains Mono"],"code-md":["JetBrains Mono"],"code-sm":["JetBrains Mono"],
+      "headline-lg":["Geist"],"headline-md":["Geist"],"headline-sm":["Geist"],"body-md":["Inter"],"body-sm":["Inter"]
+    },
+    fontSize:{
+      "label-caps":["11px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],
+      "code-md":["14px",{lineHeight:"22px",letterSpacing:"0",fontWeight:"400"}],
+      "code-sm":["12px",{lineHeight:"18px",letterSpacing:"0",fontWeight:"400"}],
+      "headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "body-md":["16px",{lineHeight:"24px",letterSpacing:"0",fontWeight:"400"}],
+      "body-sm":["14px",{lineHeight:"20px",letterSpacing:"0",fontWeight:"400"}]
+    }
+  }}
+}
+</script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  body { min-height: 100dvh; }
+  ::selection { background: rgba(173,198,255,0.3); color:#adc6ff; }
+
+  .glass-card{ background:rgba(27,27,30,0.7); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(140,144,159,0.15); transition:border-color .3s, box-shadow .3s, transform .3s; }
+  .glass-card:hover{ border-color:rgba(173,198,255,0.4); box-shadow:0 0 20px rgba(173,198,255,0.1); transform:translateY(-2px); }
+
+  .arch-line{ background:linear-gradient(90deg,transparent,#424754,transparent); height:1px; width:100%; }
+  .arch-line-v{ background:linear-gradient(180deg,transparent,#424754,transparent); width:1px; }
+
+  .glow-pulse{ animation:pulse 2.2s cubic-bezier(.4,0,.6,1) infinite; }
+  @keyframes pulse{0%,100%{opacity:1;filter:brightness(1);}50%{opacity:.55;filter:brightness(1.4);}}
+
+  .terminal-cursor::after{ content:'_'; animation:blink 1s step-end infinite; color:#4cd7f6; }
+  @keyframes blink{from,to{opacity:1;}50%{opacity:0;}}
+
+  .chip{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.03em; }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+  #boot-overlay{ transition:opacity .5s ease, visibility .5s ease; }
+  #boot-overlay.hidden-boot{ opacity:0; visibility:hidden; pointer-events:none; }
+
+  #drawer{ transition:transform .3s cubic-bezier(.4,0,.2,1); }
+  #drawer.closed{ transform:translateX(100%); }
+  #scrim{ transition:opacity .3s ease; }
+  #scrim.hidden-scrim{ opacity:0; pointer-events:none; }
+
+  .modal-backdrop{ transition:opacity .25s ease; }
+  .modal-backdrop.hidden-modal{ opacity:0; pointer-events:none; }
+  .modal-panel{ transition:transform .3s cubic-bezier(.34,1.3,.64,1), opacity .25s ease; }
+  .modal-backdrop.hidden-modal .modal-panel{ transform:translateY(16px) scale(.98); opacity:0; }
+
+  .bottom-nav-btn.active{ background:rgba(77,142,255,0.16); color:#adc6ff; }
+  .bottom-nav-btn.active .material-symbols-outlined{ font-variation-settings:'FILL' 1; }
+
+  .drawer-link.active{ border-left-color:#adc6ff; background:rgba(173,198,255,.08); color:#adc6ff; }
+
+  .filter-chip[aria-pressed="true"]{ background:rgba(173,198,255,0.14); border-color:#adc6ff; color:#adc6ff; }
+  .card-hide{ display:none !important; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible{
+    outline:2px solid #adc6ff; outline-offset:2px; border-radius:2px;
+  }
+
+  .chat-bubble-in{ animation:chatIn .3s ease; }
+  @keyframes chatIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  @media (prefers-reduced-motion: reduce){
+    .glow-pulse, .terminal-cursor::after{ animation:none; }
+    #boot-overlay{ display:none; }
+    .view.active{ animation:none; }
+  }
+</style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased h-screen flex flex-col overflow-hidden">
+
+<!-- BOOT OVERLAY -->
+<div id="boot-overlay" class="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center gap-lg px-md">
+  <div class="flex items-center gap-sm">
+    <span class="material-symbols-outlined text-primary text-3xl">terminal</span>
+    <span class="font-headline-md text-headline-md text-on-surface">Sahana Hub</span>
+  </div>
+  <p id="boot-line" class="font-code-md text-code-md text-on-surface-variant">&gt; Initializing Engineering Workspace...<span class="terminal-cursor"></span></p>
+  <div id="boot-enter-wrap" class="opacity-0 flex flex-col items-center gap-md transition-opacity duration-500">
+    <div class="w-full max-w-xs arch-line"></div>
+    <span class="chip text-on-surface-variant">INITIALIZATION COMPLETE</span>
+    <button id="boot-enter" class="border border-primary/50 text-primary font-headline-sm text-headline-sm tracking-widest px-xl py-sm rounded hover:bg-primary/10 transition-colors">
+      ENTER
+    </button>
+    <span class="chip text-on-surface-variant">↵ SYSTEM_LOAD</span>
+  </div>
+  <p class="chip text-on-surface-variant/50 absolute bottom-lg">© 2026 SAHANA ENGINEERING HUB | ALL PROTOCOLS OPERATIONAL</p>
+</div>
+
+<!-- BACKGROUND SHADER -->
+<div class="fixed inset-0 w-full h-full -z-10 opacity-25 pointer-events-none">
+  <canvas id="shader-canvas" style="display:block;width:100%;height:100%"></canvas>
+</div>
+
+<!-- TOP APP BAR -->
+<header class="w-full flex-none flex justify-between items-center px-md py-sm bg-surface/75 backdrop-blur-xl border-b border-outline-variant z-40">
+  <div class="flex items-center gap-sm">
+    <button id="drawer-btn" aria-label="Open navigation" class="text-on-surface p-xs -ml-xs">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <span class="material-symbols-outlined text-primary hidden sm:inline">terminal</span>
+    <h1 class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">Sahana Hub</h1>
+    <span class="chip text-on-surface-variant hidden md:inline">/ <span id="view-title">dashboard</span></span>
+  </div>
+  <div class="flex items-center gap-sm">
+    <span class="hidden lg:flex items-center gap-xs chip text-on-surface-variant">
+      <span class="w-1.5 h-1.5 rounded-full bg-tertiary glow-pulse"></span>SYNC_ACTIVE
+    </span>
+    <span class="chip text-primary bg-primary/10 px-sm py-xs rounded border border-primary/20">v1.0.4-stable</span>
+  </div>
+</header>
+
+<!-- DRAWER -->
+<div id="scrim" class="hidden-scrim fixed inset-0 bg-black/60 z-[59]"></div>
+<aside id="drawer" class="closed fixed inset-y-0 right-0 z-[60] w-80 bg-surface-container border-l border-outline-variant flex flex-col">
+  <div class="p-md flex items-center gap-md border-b border-outline-variant">
+    <div class="w-12 h-12 rounded-lg bg-surface-container-highest border border-outline-variant flex items-center justify-center text-primary font-bold">SR</div>
+    <div class="flex-1">
+      <h4 class="font-headline-sm text-headline-sm text-on-surface">Sahana_Dev</h4>
+      <p class="chip text-on-surface-variant">Branch: main</p>
+    </div>
+    <button id="drawer-close" aria-label="Close navigation" class="text-on-surface-variant p-xs">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+  <nav class="flex-grow p-md space-y-xs overflow-y-auto font-code-md text-code-md">
+    <a data-view="dashboard" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">dashboard</span>Command Center</a>
+    <a data-view="architecture" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">account_tree</span>Active Projects</a>
+    <a data-view="analytics" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">monitoring</span>GitHub Analytics</a>
+    <a data-view="skills" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">hub</span>Skills Graph</a>
+    <a data-view="assistant" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">memory</span>AI Assistant</a>
+    <a data-view="contact" class="drawer-link nav-target flex items-center gap-md p-sm rounded-lg border-l-2 border-transparent text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-all cursor-pointer"><span class="material-symbols-outlined text-[20px]">alternate_email</span>Contact / Settings</a>
+    <a href="https://drive.google.com/file/d/1XyJ29Fe9UJudsNCWaeu_dmBo6jMlRQIt/view?usp=sharing" target="_blank" rel="noopener" class="flex items-center gap-md p-sm rounded-lg bg-primary/10 text-primary mt-sm"><span class="material-symbols-outlined text-[20px]">download</span>View Résumé</a>
+  </nav>
+  <div class="p-md border-t border-outline-variant flex items-center justify-between">
+    <span class="chip text-on-surface-variant">Open to internships</span>
+    <a href="https://github.com/Sahana7704?tab=repositories" target="_blank" rel="noopener" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[20px]">code</span></a>
+  </div>
+</aside>
+
+<!-- MAIN SCROLL AREA -->
+<main id="scroll-area" class="flex-grow overflow-y-auto">
+<div class="max-w-max-width mx-auto w-full px-md md:px-lg py-lg pb-32">
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="view-dashboard" class="view active">
+    <div class="mb-lg">
+      <div class="glass-card rounded-xl p-xs flex items-center gap-sm focus-within:ring-1 focus-within:ring-primary">
+        <span class="material-symbols-outlined text-on-surface-variant ml-sm">search</span>
+        <input id="cmd-input" type="text" placeholder="Execute command or search nodes... try 'redis', 'resume', 'contact'"
+               class="bg-transparent border-none focus:ring-0 w-full font-code-md text-code-md text-on-surface placeholder:text-on-surface-variant/50"/>
+        <div class="hidden md:flex gap-xs mr-sm">
+          <kbd class="px-xs py-[2px] rounded border border-outline-variant chip text-on-surface-variant">Ctrl</kbd>
+          <kbd class="px-xs py-[2px] rounded border border-outline-variant chip text-on-surface-variant">K</kbd>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-lg">
+      <h2 class="font-headline-lg text-headline-lg text-on-surface">Hey, I'm Sahana.</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-xs max-w-2xl">
+        Software Engineer · AI/ML · Data Analytics · Prompt Engineering. Integrated M.Tech student at VIT Vellore —
+        this hub is a live index of what I've built. Tap any tile to explore.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-sm max-w-3xl">
+
+      <button data-view="architecture" class="nav-target glass-card p-md rounded-xl flex items-center gap-md text-left group">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary">rocket_launch</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Active Projects</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">15+ shipped</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">chevron_right</span>
+      </button>
+
+      <button data-view="analytics" class="nav-target glass-card p-md rounded-xl flex items-center gap-md text-left group">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary">monitoring</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">GitHub Analytics</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">@Sahana7704</p>
+        </div>
+        <span class="chip text-primary bg-primary/10 px-xs py-[2px] rounded shrink-0 hidden sm:inline">CONNECTED</span>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">chevron_right</span>
+      </button>
+
+      <button data-view="assistant" class="nav-target glass-card p-md rounded-xl flex items-center gap-md text-left group border-l-2 border-l-primary/50">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary animate-pulse">memory</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">AI Assistant</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">Instant Q&amp;A index</p>
+        </div>
+        <span class="chip text-primary bg-primary/10 px-xs py-[2px] rounded shrink-0 hidden sm:inline">ASSISTANT_READY</span>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">chevron_right</span>
+      </button>
+
+      <button data-view="skills" class="nav-target glass-card p-md rounded-xl flex items-center gap-md text-left group">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary">hub</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Skills Graph</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">9 nodes mapped</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">chevron_right</span>
+      </button>
+
+      <a href="https://drive.google.com/file/d/1XyJ29Fe9UJudsNCWaeu_dmBo6jMlRQIt/view?usp=sharing" target="_blank" rel="noopener" class="glass-card p-md rounded-xl flex items-center gap-md group">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-primary">description</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Résumé</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">PDF · View</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors shrink-0">open_in_new</span>
+      </a>
+
+      <button data-view="contact" class="nav-target glass-card p-md rounded-xl flex items-center gap-md text-left group border-dashed">
+        <div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-tertiary">alternate_email</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Contact</h3>
+          <p class="chip text-on-surface-variant mt-[2px]">Open to internships</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">chevron_right</span>
+      </button>
+
+    </div>
+  </section>
+
+  <!-- ============ ARCHITECTURE LAB ============ -->
+  <section id="view-architecture" class="view">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md mb-lg">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface">Active Projects</h2>
+        <p class="font-code-md text-code-md text-on-surface-variant">Every project, broken into its real system modules.</p>
+      </div>
+      <div class="flex flex-wrap gap-xs" id="proj-filter-bar">
+        <button data-filter="all" aria-pressed="true" class="filter-chip chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant">All</button>
+        <button data-filter="ai" aria-pressed="false" class="filter-chip chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant">AI/ML</button>
+        <button data-filter="fullstack" aria-pressed="false" class="filter-chip chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant">Full-Stack</button>
+        <button data-filter="product" aria-pressed="false" class="filter-chip chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant">Product</button>
+      </div>
+    </div>
+    <div id="project-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md"></div>
+  </section>
+
+  <!-- ============ GITHUB ANALYTICS ============ -->
+  <section id="view-analytics" class="view">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface">Engineering Insights</h2>
+    <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs mb-lg max-w-xl">A snapshot of the languages and repos behind these projects. <a href="https://github.com/Sahana7704" target="_blank" rel="noopener" class="text-primary hover:underline">Full activity on GitHub →</a></p>
+
+    <div class="grid grid-cols-3 gap-md mb-lg">
+      <div class="glass-card rounded-lg p-md"><p class="chip text-on-surface-variant">FEATURED REPOS</p><p class="font-headline-md text-headline-md text-primary mt-xs" id="repo-count">—</p></div>
+      <div class="glass-card rounded-lg p-md"><p class="chip text-on-surface-variant">CORE STACK</p><p class="font-headline-md text-headline-md text-on-surface mt-xs">Python</p></div>
+      <div class="glass-card rounded-lg p-md"><p class="chip text-on-surface-variant">CGPA</p><p class="font-headline-md text-headline-md text-on-surface mt-xs">7.54</p></div>
+    </div>
+
+    <div class="glass-card rounded-xl p-md mb-lg">
+      <div class="flex justify-between items-center mb-md"><h3 class="font-headline-sm text-headline-sm text-on-surface">Primary Languages</h3><span class="chip text-on-surface-variant">Across featured projects</span></div>
+      <div id="lang-bars" class="space-y-sm"></div>
+    </div>
+
+    <h3 class="font-headline-sm text-headline-sm text-on-surface mb-md">Repositories</h3>
+    <div id="repo-grid" class="grid grid-cols-1 md:grid-cols-2 gap-md"></div>
+  </section>
+
+  <!-- ============ SKILLS GRAPH ============ -->
+  <section id="view-skills" class="view">
+    <div class="flex justify-between items-start mb-md">
+      <div>
+        <h2 class="font-headline-lg text-headline-lg text-on-surface">Skills Graph</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">How my core stack connects to the tools around it. Tap a node for details.</p>
+      </div>
+      <div class="glass-card rounded-lg p-sm hidden sm:flex flex-col gap-xs chip">
+        <span class="flex items-center gap-xs text-on-surface"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span>Core</span>
+        <span class="flex items-center gap-xs text-on-surface"><span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>Frameworks</span>
+        <span class="flex items-center gap-xs text-on-surface"><span class="w-2.5 h-2.5 rounded-full bg-on-surface-variant"></span>Platforms &amp; Tools</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+      <div class="lg:col-span-2 glass-card rounded-xl p-md sm:p-lg relative overflow-hidden">
+        <div id="skills-graph-wrap" class="relative w-full" style="height:520px;">
+          <svg id="skills-svg" viewBox="0 0 100 100" preserveAspectRatio="none" class="absolute inset-0 w-full h-full"></svg>
+          <div id="skills-nodes" class="absolute inset-0"></div>
+        </div>
+      </div>
+      <div id="skill-detail-panel" class="glass-card rounded-xl p-md sm:p-lg flex flex-col gap-sm">
+        <div class="flex items-center justify-center h-full text-center" id="skill-detail-empty">
+          <p class="chip text-on-surface-variant">Tap a node in the graph to see how it's used.</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-xs mt-md sm:hidden chip text-on-surface-variant">
+      <span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-primary"></span>Core</span>
+      <span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-tertiary"></span>Frameworks</span>
+      <span class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-on-surface-variant"></span>Tools</span>
+    </div>
+  </section>
+
+  <!-- ============ AI ASSISTANT ============ -->
+  <section id="view-assistant" class="view">
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center gap-sm mb-xs">
+        <span class="w-2 h-2 rounded-full bg-tertiary glow-pulse"></span>
+        <span class="font-headline-sm text-headline-sm text-on-surface">Sahana's Project Index</span>
+      </div>
+      <p class="chip text-on-surface-variant mb-md">Instant answers pulled from her real project &amp; skills data — a quick FAQ, not a live AI model.</p>
+
+      <div id="chat-log" class="glass-card rounded-xl p-md flex flex-col gap-md h-[420px] overflow-y-auto mb-md"></div>
+
+      <div class="flex flex-wrap gap-xs mb-md" id="chat-suggestions">
+        <button class="chat-suggest chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant hover:border-primary/40 hover:text-on-surface transition-all" data-q="Tell me about the PCOS project">PCOS project?</button>
+        <button class="chat-suggest chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant hover:border-primary/40 hover:text-on-surface transition-all" data-q="What is your tech stack">Tech stack?</button>
+        <button class="chat-suggest chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant hover:border-primary/40 hover:text-on-surface transition-all" data-q="Any live projects I can see">Live demos?</button>
+        <button class="chat-suggest chip px-sm py-xs rounded-full border border-outline-variant text-on-surface-variant hover:border-primary/40 hover:text-on-surface transition-all" data-q="How do I contact you">Contact info?</button>
+      </div>
+
+      <form id="chat-form" class="glass-card rounded-xl p-xs flex items-center gap-sm">
+        <input id="chat-input" type="text" placeholder="Ask about a project, skill, or how to reach me..." class="bg-transparent border-none focus:ring-0 w-full font-code-md text-code-md text-on-surface placeholder:text-on-surface-variant/50 pl-sm"/>
+        <button type="submit" aria-label="Send" class="bg-primary text-on-primary-container p-sm rounded-lg mr-xs"><span class="material-symbols-outlined text-[18px]">send</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT / SETTINGS ============ -->
+  <section id="view-contact" class="view">
+    <h2 class="font-headline-lg text-headline-lg text-on-surface mb-lg">Contact / Settings</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg max-w-4xl">
+      <div class="flex flex-col gap-md">
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Open to internships and roles across software engineering, AI/ML, and data analytics. Email is the fastest way to reach me.
+        </p>
+        <a href="mailto:sahana.ramesh.7788@gmail.com" class="glass-card rounded-lg p-sm flex items-center gap-md hover:border-primary/40 transition-all">
+          <span class="material-symbols-outlined text-primary">mail</span><div><p class="font-code-sm text-code-sm text-on-surface">sahana.ramesh.7788@gmail.com</p><p class="chip text-on-surface-variant">Email</p></div>
+        </a>
+        <a href="https://github.com/Sahana7704?tab=repositories" target="_blank" rel="noopener" class="glass-card rounded-lg p-sm flex items-center gap-md hover:border-primary/40 transition-all">
+          <span class="material-symbols-outlined text-primary">code</span><div><p class="font-code-sm text-code-sm text-on-surface">github.com/Sahana7704</p><p class="chip text-on-surface-variant">GitHub</p></div>
+        </a>
+        <a href="https://www.linkedin.com/in/sahanar7704/" target="_blank" rel="noopener" class="glass-card rounded-lg p-sm flex items-center gap-md hover:border-primary/40 transition-all">
+          <span class="material-symbols-outlined text-primary">link</span><div><p class="font-code-sm text-code-sm text-on-surface">linkedin.com/in/sahanar7704</p><p class="chip text-on-surface-variant">LinkedIn</p></div>
+        </a>
+        <a href="https://drive.google.com/file/d/1XyJ29Fe9UJudsNCWaeu_dmBo6jMlRQIt/view?usp=sharing" target="_blank" rel="noopener" class="glass-card rounded-lg p-sm flex items-center gap-md hover:border-primary/40 transition-all">
+          <span class="material-symbols-outlined text-primary">download</span><div><p class="font-code-sm text-code-sm text-on-surface">Sahana_R_Resume.pdf</p><p class="chip text-on-surface-variant">Résumé</p></div>
+        </a>
+      </div>
+
+      <div class="glass-card rounded-xl p-lg flex flex-col gap-md h-fit">
+        <div class="flex items-center gap-xs">
+          <span class="w-2 h-2 rounded-full bg-tertiary glow-pulse"></span>
+          <span class="chip text-tertiary">STATUS: OPEN_TO_WORK</span>
+        </div>
+        <div class="bg-black rounded border border-outline-variant/30 p-sm">
+          <p class="chip text-tertiary">shn@hub ~ % <span class="text-on-surface">whoami --full</span></p>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex justify-between items-center gap-md py-sm border-b border-outline-variant/30">
+            <span class="chip text-on-surface-variant">EDUCATION</span>
+            <span class="font-code-sm text-code-sm text-on-surface text-right">Integrated M.Tech SWE · VIT Vellore</span>
+          </div>
+          <div class="flex justify-between items-center gap-md py-sm border-b border-outline-variant/30">
+            <span class="chip text-on-surface-variant">CGPA</span>
+            <span class="font-code-sm text-code-sm text-on-surface">7.54</span>
+          </div>
+          <div class="flex justify-between items-center gap-md py-sm border-b border-outline-variant/30">
+            <span class="chip text-on-surface-variant">FOCUS</span>
+            <span class="font-code-sm text-code-sm text-on-surface text-right">AI/ML · Full-Stack · Prompt Eng.</span>
+          </div>
+          <div class="flex justify-between items-center gap-md py-sm border-b border-outline-variant/30">
+            <span class="chip text-on-surface-variant">LOOKING FOR</span>
+            <span class="font-code-sm text-code-sm text-on-surface text-right">Internships</span>
+          </div>
+          <div class="flex justify-between items-center gap-md py-sm">
+            <span class="chip text-on-surface-variant">RESPONSE TIME</span>
+            <span class="font-code-sm text-code-sm text-on-surface">~24 hours</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="fixed bottom-md left-0 right-0 flex justify-center items-center px-lg z-50">
+  <div class="rounded-full w-auto min-w-[280px] bg-surface-container-low/85 border border-outline-variant backdrop-blur-xl shadow-lg flex justify-center items-center gap-xs px-md py-xs">
+    <button data-view="dashboard" class="nav-target bottom-nav-btn active text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="Dashboard"><span class="material-symbols-outlined">dashboard</span></button>
+    <button data-view="architecture" class="nav-target bottom-nav-btn text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="Active Projects"><span class="material-symbols-outlined">account_tree</span></button>
+    <button data-view="analytics" class="nav-target bottom-nav-btn text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="GitHub Analytics"><span class="material-symbols-outlined">code</span></button>
+    <button data-view="skills" class="nav-target bottom-nav-btn text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="Skills Graph"><span class="material-symbols-outlined">database</span></button>
+    <button data-view="assistant" class="nav-target bottom-nav-btn text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="AI Assistant"><span class="material-symbols-outlined">forum</span></button>
+    <button data-view="contact" class="nav-target bottom-nav-btn text-on-surface-variant rounded-full p-sm flex items-center justify-center transition-all" aria-label="Contact"><span class="material-symbols-outlined">settings</span></button>
+  </div>
+</nav>
+
+<!-- PROJECT MODAL -->
+<div id="modal-backdrop" class="modal-backdrop hidden-modal fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm flex items-center justify-center p-md">
+  <div class="modal-panel glass-card rounded-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-lg relative" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button id="modal-close" aria-label="Close" class="absolute top-md right-md text-on-surface-variant hover:text-on-surface p-xs"><span class="material-symbols-outlined">close</span></button>
+    <div class="flex items-center gap-sm">
+      <span id="modal-category" class="chip text-tertiary"></span>
+      <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+      <span id="modal-id" class="chip text-primary"></span>
+    </div>
+    <h3 id="modal-title" class="font-headline-md text-headline-md text-on-surface mt-xs"></h3>
+    <p id="modal-overview" class="font-body-sm text-body-sm text-on-surface-variant mt-sm"></p>
+
+    <div id="modal-modules" class="flex flex-col gap-sm mt-md"></div>
+
+    <div class="mt-md">
+      <p class="chip text-on-surface-variant mb-xs">KEY FEATURES</p>
+      <ul id="modal-bullets" class="flex flex-col gap-xs font-body-sm text-body-sm text-on-surface-variant list-disc pl-lg"></ul>
+    </div>
+
+    <div id="modal-links" class="flex flex-wrap gap-sm mt-lg"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const projects = [
+  { id:"pcos", designId:"ARC-104-HEALTH", title:"PCOS/PCOD Detection System", category:"Healthcare AI", tags:["ai"], icon:"biotech",
+    tech:["Python","TensorFlow/Keras","VGG16","XGBoost","Streamlit"],
+    overview:"A healthcare AI system that screens for PCOS/PCOD from medical imaging data, pairing a CNN with a gradient-boosted classifier.",
+    modules:[
+      {label:"INPUT", name:"Medical Imaging Data", detail:"Preprocessed clinical image dataset"},
+      {label:"MODEL", name:"VGG16 → XGBoost Ensemble", detail:"CNN feature extraction feeding a boosted classifier"},
+      {label:"SECURITY", name:"DCT Watermarking", detail:"Verifies medical image data integrity"},
+      {label:"DEPLOY", name:"Streamlit Cloud", detail:"Resolved opencv-python-headless import issues"}
+    ],
+    bullets:[
+      "Combined a VGG16 convolutional neural network with XGBoost for classification from medical imaging data.",
+      "Implemented DCT-based digital watermarking to secure and verify medical image data integrity.",
+      "Deployed as a Streamlit web app, resolving cloud-environment dependency issues along the way."
+    ], links:[
+      {label:"View Code", href:"https://github.com/Sahana7704/PCOS-Detection", icon:"code"}
+    ] },
+
+  { id:"inventory", designId:"ARC-772-DELTA", title:"Inventory Reservation System", category:"Full-Stack · Allo Health Assessment", tags:["fullstack"], icon:"inventory_2",
+    tech:["Next.js 15","Prisma","PostgreSQL","Redis","Vercel"],
+    overview:"A multi-warehouse inventory reservation platform built for a technical assessment.",
+    modules:[
+      {label:"GATEWAY", name:"Next.js 15 API Routes", detail:"ingress.sahana.io-style routing layer"},
+      {label:"LOCK", name:"Redis Distributed Lock (Upstash)", detail:"Prevents double-booking across warehouses"},
+      {label:"PERSISTENCE", name:"PostgreSQL via Prisma (Supabase)", detail:"Reservation + inventory state"},
+      {label:"STATUS", name:"Deployment", detail:"Prisma 7 compatibility resolved on Windows"}
+    ],
+    bullets:[
+      "Built a multi-warehouse inventory reservation platform with Next.js 15, Prisma ORM, and PostgreSQL (Supabase).",
+      "Used Redis (Upstash) for reservation locking and caching to prevent double-booking across warehouses.",
+      "Resolved Prisma 7 compatibility issues and environment configuration for a smooth Windows-based deployment."
+    ],
+    links:[
+      {label:"View Code", href:"https://github.com/sahanar2022-glitch/allo-inventory", icon:"code"}
+    ]},
+
+  { id:"habitmagic", designId:"ARC-341-HABIT", title:"HabitMagic", category:"Product · Habit Tracker", tags:["product","fullstack"], icon:"auto_awesome",
+    tech:["React","Vite","PWA"],
+    overview:"A gamified habit-tracking Progressive Web App designed to make daily consistency feel rewarding.",
+    modules:[
+      {label:"CLIENT", name:"React + Vite PWA", detail:"Installable, offline-capable app shell"},
+      {label:"ENGINE", name:"Streaks & Stickers Logic", detail:"Gamified progress + unlockable rewards"},
+      {label:"ALARMS", name:"Custom Reminders", detail:"Keeps habits on schedule"},
+      {label:"DEPLOY", name:"Vercel", detail:"Published alongside public GitHub repo"}
+    ],
+    bullets:[
+      "Designed and shipped a gamified habit-tracking PWA with streaks, unlockable stickers, and custom alarms.",
+      "Focused on a warm, visually engaging UI/UX to drive daily user retention.",
+      "Published to GitHub and deployed on Vercel."
+    ],
+    links:[{label:"View Code", href:"https://github.com/Sahana7704/HabitMagic", icon:"code"}]},
+
+  { id:"handwriting", designId:"ARC-057-VISION", title:"Handwritten Character Recognition", category:"Applied ML", tags:["ai"], icon:"draw",
+    tech:["Python","LeNet-5","CNN"],
+    overview:"A LeNet-5 convolutional neural network trained end-to-end for handwritten character classification.",
+    modules:[
+      {label:"INPUT", name:"Handwritten Image Dataset", detail:"Preprocessing + augmentation pipeline"},
+      {label:"MODEL", name:"LeNet-5 CNN", detail:"Trained from scratch for character classification"},
+      {label:"OUTPUT", name:"Class Predictions", detail:"Evaluated against held-out test set"}
+    ],
+    bullets:[
+      "Trained a LeNet-5 CNN for handwritten character classification.",
+      "Covered the full pipeline: data preprocessing, augmentation, training, and evaluation."
+    ], links:[] },
+
+  { id:"travel", designId:"ARC-509-TRAVEL", title:"Travel & Tourism Management System", category:"Full-Stack", tags:["fullstack"], icon:"map",
+    tech:["JSP","Servlets","MySQL"],
+    overview:"A full-stack booking and management system with role-based workflows for admins and customers.",
+    modules:[
+      {label:"CLIENT", name:"JSP Views", detail:"Server-rendered booking interface"},
+      {label:"SERVER", name:"Servlets", detail:"Role-based business logic"},
+      {label:"PERSISTENCE", name:"MySQL", detail:"Bookings, users, and roles"}
+    ],
+    bullets:[
+      "Developed a full-stack booking and management system using JSP, Servlets, and MySQL.",
+      "Implemented role-based workflows for admin and customer-facing booking flows."
+    ], links:[] },
+
+  { id:"cloud-anomaly", designId:"ARC-233-SECURITY", title:"Cloud Login Anomaly Detection", category:"Applied ML · Security", tags:["ai"], icon:"security",
+    tech:["Python","Scikit-learn","Streamlit"],
+    overview:"An ML system that flags anomalous login activity — like repeated login attempts or logins from unusual locations — by learning patterns from login metadata.",
+    modules:[
+      {label:"INPUT", name:"RBA Login Dataset (Kaggle)", detail:"IP address, location, user credentials, login attempts"},
+      {label:"MODEL", name:"Anomaly Detection Classifier", detail:"Trained on extracted login-behavior features"},
+      {label:"INTERFACE", name:"Streamlit UI", detail:"Surfaces flagged anomalous login activity"}
+    ],
+    bullets:[
+      "Extracted features like IP address, location, user credentials, and login-attempt count to train an anomaly detection model.",
+      "Trained on the Risk-Based Authentication (RBA) dataset from Kaggle.",
+      "Built a Streamlit interface for reviewing flagged anomalous login activity in real time."
+    ],
+    links:[{label:"View Code", href:"https://github.com/Sahana7704/Cloud-Login-Anomaly-Detection", icon:"code"}]},
+
+  { id:"cotton-leaf", designId:"ARC-361-AGRI", title:"Cotton Leaf Disease Classification", category:"Applied ML · AgriTech", tags:["ai","fullstack"], icon:"eco",
+    tech:["Python","TensorFlow","React","TF Serving"],
+    overview:"A CNN-based image classifier paired with a web front end that lets farmers check whether a cotton plant is disease-free.",
+    modules:[
+      {label:"MODEL", name:"CNN Classifier", detail:"Trained on a cotton leaf image dataset"},
+      {label:"SERVING", name:"TensorFlow Serving", detail:"Model serving layer for predictions"},
+      {label:"CLIENT", name:"React Web App", detail:"Upload a leaf photo, get a classification"}
+    ],
+    bullets:[
+      "Trained a CNN to classify cotton leaf images as diseased or disease-free.",
+      "Served the trained model via TensorFlow Serving.",
+      "Built a React front end so farmers can check plant health from a photo."
+    ],
+    links:[{label:"View Code", href:"https://github.com/Sahana7704/Cotton-Leaf-Disease-Classification", icon:"code"}]},
+
+  { id:"potato-leaf", designId:"ARC-362-AGRI", title:"Potato Leaf Disease Classification", category:"Applied ML · AgriTech", tags:["ai","fullstack"], icon:"grass",
+    tech:["Python","TensorFlow","React","TF Lite"],
+    overview:"A CNN-based image classifier and web app for detecting potato leaf disease, with a TFLite-converted model for lightweight deployment.",
+    modules:[
+      {label:"MODEL", name:"CNN Classifier", detail:"Trained on a potato leaf image dataset"},
+      {label:"OPTIMIZATION", name:"TFLite Conversion", detail:"Post-training and quantization-aware variants"},
+      {label:"CLIENT", name:"React Web App", detail:"Upload a leaf photo, get a classification"}
+    ],
+    bullets:[
+      "Trained a CNN to classify potato leaf images as disease-free or diseased.",
+      "Converted the model to TensorFlow Lite, including a quantization-aware variant, for lightweight deployment.",
+      "Built a React front end so farmers can check plant health from a photo."
+    ],
+    links:[{label:"View Code", href:"https://github.com/Sahana7704/Potato-Leaf-Disease-Classification", icon:"code"}]},
+
+  { id:"taskflow", designId:"ARC-410-PRODUCT", title:"Taskflow — Todo Application", category:"Full-Stack · Productivity", tags:["fullstack","product"], icon:"checklist",
+    tech:["React","Node.js","Express"],
+    overview:"A full-stack todo app with a React front end and a Node/Express backend, using persistent JSON file storage.",
+    modules:[
+      {label:"CLIENT", name:"React 18", detail:"Todo list with filters/search, plus a detail view"},
+      {label:"SERVER", name:"Node.js + Express", detail:"CRUD REST API for todos"},
+      {label:"PERSISTENCE", name:"JSON File Storage", detail:"todos.json with UUID v4 identifiers"}
+    ],
+    bullets:[
+      "Built a full-stack todo app with a React frontend and a Node.js/Express backend.",
+      "Implemented a two-page flow: a filterable, searchable todo list and a single-todo detail view.",
+      "Used JSON file-based persistence with UUID v4 identifiers, plus full REST API documentation."
+    ],
+    links:[{label:"View Code", href:"https://github.com/Sahana7704/taskflow-todo-app", icon:"code"}]}
+];
+
+const repos = [
+  { name:"HabitMagic", desc:"Gamified habit-tracking PWA with streaks, stickers, and custom alarms.", tech:"React · Vite", href:"https://github.com/Sahana7704/HabitMagic" },
+  { name:"allo-inventory", desc:"Multi-warehouse inventory reservation platform.", tech:"Next.js · Prisma · Redis", href:"https://github.com/sahanar2022-glitch/allo-inventory" },
+  { name:"PCOS-Detection", desc:"Healthcare AI: VGG16 + XGBoost ensemble for PCOS/PCOD screening.", tech:"Python · TensorFlow", href:"https://github.com/Sahana7704/PCOS-Detection" },
+  { name:"handwriting-cnn", desc:"LeNet-5 CNN for handwritten character recognition.", tech:"Python · CNN", href:null },
+  { name:"Cloud-Login-Anomaly-Detection", desc:"ML-based anomaly detection for suspicious login activity.", tech:"Python · Scikit-learn", href:"https://github.com/Sahana7704/Cloud-Login-Anomaly-Detection" },
+  { name:"Cotton-Leaf-Disease-Classification", desc:"CNN + web app for cotton leaf disease classification.", tech:"Python · TensorFlow · React", href:"https://github.com/Sahana7704/Cotton-Leaf-Disease-Classification" },
+  { name:"Potato-Leaf-Disease-Classification", desc:"CNN + web app for potato leaf disease classification.", tech:"Python · TensorFlow · React", href:"https://github.com/Sahana7704/Potato-Leaf-Disease-Classification" },
+  { name:"taskflow-todo-app", desc:"Full-stack todo app with React frontend and Express backend.", tech:"React · Node.js", href:"https://github.com/Sahana7704/taskflow-todo-app" }
+];
+
+const languages = [ {name:"Python", pct:45, color:"bg-primary"}, {name:"JavaScript / TypeScript", pct:30, color:"bg-tertiary"}, {name:"Java", pct:15, color:"bg-secondary"}, {name:"SQL", pct:10, color:"bg-on-surface-variant"} ];
+
+const skillNodes = [
+  { id:"core", label:"Sahana_Core", type:"core", icon:"psychology", x:50, y:50,
+    desc:"The connective layer across everything she builds — from ML pipelines to full-stack apps.", match:null },
+  { id:"python", label:"Python", type:"primary", icon:"terminal", x:22, y:20,
+    desc:"Primary language for ML, data processing, and backend scripting across most projects.", match:["python"] },
+  { id:"react", label:"React/Next.js", type:"primary", icon:"web", x:78, y:20,
+    desc:"Used for every front end that needs real interactivity — dashboards, PWAs, and full-stack apps.", match:["react","next.js"] },
+  { id:"tf", label:"TensorFlow", type:"primary", icon:"psychology_alt", x:12, y:55,
+    desc:"Builds and trains the CNNs behind image classification and healthcare AI work.", match:["tensorflow"] },
+  { id:"redis", label:"Redis", type:"satellite", icon:"database", x:8, y:85,
+    desc:"Handles distributed locking and caching to prevent race conditions under load.", match:["redis"] },
+  { id:"postgres", label:"PostgreSQL", type:"satellite", icon:"storage", x:35, y:92,
+    desc:"Relational data store for structured, reservation-style data via Prisma.", match:["postgresql"] },
+  { id:"aws", label:"Vercel/Cloud", type:"satellite", icon:"cloud", x:65, y:92,
+    desc:"Deployment target for shipped apps — Vercel, Streamlit Cloud, and similar platforms.", match:["vercel","streamlit"] },
+  { id:"git", label:"Git", type:"satellite", icon:"code", x:92, y:85,
+    desc:"Version control and collaboration across every single repository she ships.", match:null },
+  { id:"mysql", label:"MySQL", type:"satellite", icon:"table_chart", x:88, y:55,
+    desc:"Relational data store for JSP/Servlet-based full-stack projects.", match:["mysql"] }
+];
+const skillEdges = [["core","python"],["core","react"],["core","tf"],["python","redis"],["python","postgres"],["react","aws"],["react","git"],["tf","mysql"],["core","redis"],["core","mysql"]];
+
+const knowledgeBase = [
+  { keys:["pcos","health","medical"], a:"The PCOS/PCOD Detection System is a healthcare AI project combining a VGG16 CNN with an XGBoost classifier to screen medical imaging data, with DCT watermarking to secure image integrity. It's live as a Streamlit app." },
+  { keys:["inventory","allo","redis","warehouse"], a:"The Inventory Reservation System is a multi-warehouse platform built with Next.js 15, Prisma, PostgreSQL, and Redis for reservation locking, built for a technical assessment." },
+  { keys:["habit","habitmagic"], a:"HabitMagic is a gamified habit-tracking PWA built with React and Vite — streaks, unlockable stickers, and custom alarms. Code's on GitHub at Sahana7704/HabitMagic." },
+  { keys:["handwrit","lenet","cnn character"], a:"The Handwritten Character Recognition tool trains a LeNet-5 CNN from scratch for character classification, covering the full pipeline from preprocessing to evaluation." },
+  { keys:["travel","tourism"], a:"The Travel & Tourism Management System is a full-stack booking platform built with JSP, Servlets, and MySQL, with role-based admin/customer workflows." },
+  { keys:["anomaly","cloud login","security","fraud"], a:"The Cloud Login Anomaly Detection project uses ML to flag suspicious login activity — trained on IP address, location, credentials, and login-attempt features from the RBA dataset, with a Streamlit UI for reviewing flags." },
+  { keys:["cotton"], a:"Cotton Leaf Disease Classification is a CNN-based image classifier, served via TensorFlow Serving, with a React front end so farmers can check whether a cotton plant is disease-free from a photo." },
+  { keys:["potato"], a:"Potato Leaf Disease Classification is a CNN-based image classifier converted to TensorFlow Lite for lightweight deployment, with a React front end for checking plant health from a photo." },
+  { keys:["taskflow","todo"], a:"Taskflow is a full-stack todo app — React frontend, Node.js/Express backend, JSON file-based persistence with UUID identifiers, plus full REST API docs." },
+  { keys:["stack","tech","skill","language"], a:"Core stack: Python, JavaScript/TypeScript, Java, SQL · React/Next.js · TensorFlow/Keras, XGBoost, Scikit-learn · PostgreSQL, Redis, MySQL · Git, Vercel, Streamlit. Also building prompt engineering skills." },
+  { keys:["live","demo","deployed"], a:"Code for every project is available on GitHub — check the Active Projects section or GitHub Analytics for links to each repo." },
+  { keys:["contact","email","reach","hire"], a:"You can reach Sahana directly at sahana.ramesh.7788@gmail.com, on GitHub at github.com/Sahana7704, or on LinkedIn at linkedin.com/in/sahanar7704. She's open to internships in software engineering, AI/ML, and data analytics." },
+  { keys:["resume","cv"], a:"You can view her résumé right from the Dashboard, drawer, or Contact page." },
+  { keys:["education","college","cgpa","vit"], a:"Sahana is an Integrated M.Tech Software Engineering student at VIT Vellore, CGPA 7.54." },
+  { keys:["internship","redback"], a:"She completed a Python internship at Redback Academy, working on core development tasks in a professional setting." }
+];
+
+/* ============================================================
+   VIEW ROUTER
+   ============================================================ */
+const views = ["dashboard","architecture","analytics","skills","assistant","contact"];
+function showView(name, push){
+  if(!views.includes(name)) name = "dashboard";
+  views.forEach(v => document.getElementById('view-'+v).classList.toggle('active', v===name));
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view===name));
+  document.querySelectorAll('.drawer-link').forEach(b => b.classList.toggle('active', b.dataset.view===name));
+  document.getElementById('view-title').textContent = name;
+  document.getElementById('scroll-area').scrollTo({top:0, behavior:'instant' in document.documentElement.style ? 'instant':'auto'});
+  if(push !== false) history.pushState(null,'', '#'+name);
+  closeDrawer();
+}
+document.querySelectorAll('.nav-target').forEach(el => el.addEventListener('click', () => showView(el.dataset.view)));
+window.addEventListener('popstate', () => showView(location.hash.replace('#','') || 'dashboard', false));
+
+/* ============================================================
+   RENDER: PROJECTS (Active Projects)
+   ============================================================ */
+const projGrid = document.getElementById('project-grid');
+function tagLabel(t){ return {ai:"AI/ML", fullstack:"Full-Stack", product:"Product"}[t] || t; }
+projects.forEach(p => {
+  const card = document.createElement('button');
+  card.className = "glass-card p-md rounded-xl flex flex-col gap-sm text-left group";
+  card.dataset.tags = p.tags.join(',');
+  card.innerHTML = `
+    <div class="flex justify-between items-start">
+      <span class="material-symbols-outlined text-primary">${p.icon}</span>
+      <span class="chip text-on-surface-variant">${p.designId}</span>
+    </div>
+    <h3 class="font-headline-sm text-headline-sm text-on-surface mt-xs">${p.title}</h3>
+    <p class="chip text-on-surface-variant">${p.category}</p>
+    <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">${p.overview}</p>
+    <div class="flex flex-wrap gap-xs mt-auto pt-sm">${p.tech.slice(0,3).map(t=>`<span class="chip px-xs py-[2px] rounded border border-outline-variant/60 text-on-surface-variant">${t}</span>`).join('')}</div>
+    <span class="chip text-primary opacity-0 group-hover:opacity-100 transition-opacity mt-xs">OPEN SCHEMATIC →</span>
+  `;
+  card.addEventListener('click', () => openProjectModal(p));
+  projGrid.appendChild(card);
+});
+document.querySelectorAll('#proj-filter-bar .filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#proj-filter-bar .filter-chip').forEach(b=>b.setAttribute('aria-pressed','false'));
+    btn.setAttribute('aria-pressed','true');
+    const f = btn.dataset.filter;
+    projGrid.querySelectorAll('button').forEach(c => c.classList.toggle('card-hide', f!=='all' && !c.dataset.tags.split(',').includes(f)));
+  });
+});
+
+/* ---- Project Modal ---- */
+const modalBackdrop = document.getElementById('modal-backdrop');
+function openProjectModal(p){
+  document.getElementById('modal-category').textContent = p.category.toUpperCase();
+  document.getElementById('modal-id').textContent = p.designId;
+  document.getElementById('modal-title').textContent = p.title;
+  document.getElementById('modal-overview').textContent = p.overview;
+  document.getElementById('modal-modules').innerHTML = p.modules.map(m => `
+    <div class="bg-surface-container border border-outline-variant p-sm rounded-sm flex items-center justify-between gap-md">
+      <div class="flex items-center gap-sm">
+        <span class="chip bg-primary/10 text-primary px-xs py-[2px] rounded shrink-0">${m.label}</span>
+        <span class="font-code-md text-code-md text-on-surface">${m.name}</span>
+      </div>
+      <span class="chip text-on-surface-variant text-right hidden sm:block">${m.detail}</span>
+    </div>`).join('');
+  document.getElementById('modal-bullets').innerHTML = p.bullets.map(b=>`<li>${b}</li>`).join('');
+  const links = document.getElementById('modal-links');
+  links.innerHTML = p.links.length ? p.links.map(l => `<a href="${l.href}" target="_blank" rel="noopener" class="bg-surface-container-high border border-outline-variant text-on-surface font-code-sm text-code-sm px-md py-sm rounded-sm hover:bg-surface-container-highest transition-all flex items-center gap-xs"><span class="material-symbols-outlined text-[16px]">${l.icon}</span>${l.label}</a>`).join('')
+    : `<span class="chip text-on-surface-variant">Code available on request</span>`;
+  modalBackdrop.classList.remove('hidden-modal');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modal-close').focus();
+}
+function closeModal(){ modalBackdrop.classList.add('hidden-modal'); document.body.style.overflow=''; }
+document.getElementById('modal-close').addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', e => { if(e.target===modalBackdrop) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeModal(); closeDrawer(); }});
+
+/* ============================================================
+   RENDER: GITHUB ANALYTICS
+   ============================================================ */
+document.getElementById('lang-bars').innerHTML = languages.map(l => `
+  <div>
+    <div class="flex justify-between chip text-on-surface-variant mb-1"><span>${l.name}</span><span class="text-on-surface">${l.pct}%</span></div>
+    <div class="h-1.5 bg-outline-variant/40 rounded-full overflow-hidden"><div class="h-full ${l.color} rounded-full" style="width:${l.pct}%"></div></div>
+  </div>`).join('');
+
+document.getElementById('repo-grid').innerHTML = repos.map(r => `
+  <a href="${r.href || '#'}" ${r.href ? 'target="_blank" rel="noopener"' : 'onclick="return false;" style="cursor:default;"'} class="glass-card rounded-lg p-md flex flex-col gap-xs ${r.href ? 'hover:border-primary/40' : ''}">
+    <div class="flex items-center justify-between">
+      <span class="font-code-md text-code-md text-on-surface flex items-center gap-xs"><span class="material-symbols-outlined text-primary text-[18px]">folder_code</span>${r.name}</span>
+      ${r.href ? '<span class="material-symbols-outlined text-on-surface-variant text-[16px]">open_in_new</span>' : '<span class="chip text-on-surface-variant">private</span>'}
+    </div>
+    <p class="font-body-sm text-body-sm text-on-surface-variant">${r.desc}</p>
+    <p class="chip text-on-surface-variant mt-xs">${r.tech}</p>
+  </a>`).join('');
+document.getElementById('repo-count').textContent = repos.length;
+
+/* ============================================================
+   RENDER: SKILLS GRAPH
+   ============================================================ */
+const svg = document.getElementById('skills-svg');
+const nodesWrap = document.getElementById('skills-nodes');
+const nodeById = Object.fromEntries(skillNodes.map(n=>[n.id,n]));
+svg.innerHTML = skillEdges.map(([a,b]) => {
+  const A = nodeById[a], B = nodeById[b];
+  return `<line data-a="${a}" data-b="${b}" x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="#424754" stroke-width="0.3" stroke-dasharray="1,1" vector-effect="non-scaling-stroke" style="transition:stroke .25s, stroke-width .25s"/>`;
+}).join('');
+
+const typeStyle = { core:{bg:"bg-primary/15", border:"border-primary", text:"text-primary", size:"w-20 h-20 sm:w-24 sm:h-24"},
+                     primary:{bg:"bg-tertiary/10", border:"border-tertiary/50", text:"text-tertiary", size:"w-16 h-16"},
+                     satellite:{bg:"bg-surface-container-high", border:"border-outline-variant", text:"text-on-surface-variant", size:"w-14 h-14"} };
+nodesWrap.innerHTML = skillNodes.map(n => {
+  const s = typeStyle[n.type];
+  return `<button data-node="${n.id}" class="skill-node absolute flex flex-col items-center gap-xs -translate-x-1/2 -translate-y-1/2 bg-transparent border-0 p-0 cursor-pointer focus-visible:outline-2" style="left:${n.x}%;top:${n.y}%;">    <div class="${s.size} ${s.bg} border ${s.border} rounded-xl flex items-center justify-center transition-transform ${n.type==='core' ? 'glow-pulse' : ''}">
+      <span class="material-symbols-outlined ${s.text}" style="font-size:${n.type==='core'?'28px':'22px'}">${n.icon}</span>
+    </div>
+    <span class="font-code-sm text-code-sm ${n.type==='core' ? 'text-primary font-bold' : 'text-on-surface'} text-center whitespace-nowrap">${n.label}</span>
+  </button>`;
+}).join('');
+
+const typeLabel = { core:"Core", primary:"Framework", satellite:"Platform / Tool" };
+function selectSkill(id){
+  const n = nodeById[id];
+  document.querySelectorAll('.skill-node > div').forEach(el => el.classList.remove('ring-2','ring-primary'));
+  document.querySelector(`.skill-node[data-node="${id}"] > div`).classList.add('ring-2','ring-primary');
+
+  svg.querySelectorAll('line').forEach(line => {
+    const connected = line.dataset.a === id || line.dataset.b === id;
+    line.setAttribute('stroke', connected ? '#adc6ff' : '#424754');
+    line.setAttribute('stroke-width', connected ? '0.6' : '0.3');
+    line.style.opacity = connected ? '1' : '0.35';
+  });
+
+  const related = n.match
+    ? projects.filter(p => p.tech.some(t => n.match.some(m => t.toLowerCase().includes(m))))
+    : projects;
+  const relatedHtml = related.length
+    ? related.slice(0,6).map(p => `<li class="chip text-on-surface-variant">${p.title}</li>`).join('')
+    : `<li class="chip text-on-surface-variant">Used across projects</li>`;
+
+  document.getElementById('skill-detail-panel').innerHTML = `
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined ${n.type==='core'?'text-primary':n.type==='primary'?'text-tertiary':'text-on-surface-variant'}">${n.icon}</span>
+      <div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">${n.label}</h3>
+        <p class="chip text-on-surface-variant">${typeLabel[n.type]}</p>
+      </div>
+    </div>
+    <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">${n.desc}</p>
+    <div class="arch-line my-xs"></div>
+    <p class="chip text-on-surface-variant mb-xs">USED IN</p>
+    <ul class="flex flex-col gap-xs list-disc pl-lg">${relatedHtml}</ul>
+  `;
+}
+document.querySelectorAll('.skill-node').forEach(btn => {
+  btn.addEventListener('click', () => selectSkill(btn.dataset.node));
+});
+selectSkill('core');
+
+/* ============================================================
+   AI ASSISTANT (keyword-matched, honest about being canned)
+   ============================================================ */
+const chatLog = document.getElementById('chat-log');
+function addBubble(text, who){
+  const el = document.createElement('div');
+  el.className = "chat-bubble-in " + (who==='user' ? "self-end max-w-[85%] ml-auto" : "max-w-[90%]");
+  if(who==='user'){
+    el.innerHTML = `<div class="bg-primary/10 border border-primary/20 rounded-lg px-sm py-sm font-code-sm text-code-sm text-on-surface">${text}</div>`;
+  } else {
+    el.innerHTML = `<div class="border-l-2 border-tertiary bg-surface-container-lowest rounded-r-lg px-sm py-sm font-body-sm text-body-sm text-on-surface-variant">${text}</div>`;
+  }
+  chatLog.appendChild(el);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+function answer(q){
+  const ql = q.toLowerCase();
+  const hit = knowledgeBase.find(k => k.keys.some(key => ql.includes(key)));
+  return hit ? hit.a : "I don't have a canned answer for that yet — try asking about a specific project, her tech stack, live demos, or how to get in touch. You can also check the Résumé for the full picture.";
+}
+addBubble("Hi, I'm the project index for Sahana's engineering hub. Ask about a project, her stack, live demos, or how to reach her.", "bot");
+document.getElementById('chat-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const input = document.getElementById('chat-input');
+  const q = input.value.trim();
+  if(!q) return;
+  addBubble(q, 'user');
+  input.value = '';
+  setTimeout(() => addBubble(answer(q), 'bot'), 300);
+});
+document.querySelectorAll('.chat-suggest').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const q = btn.dataset.q;
+    addBubble(q, 'user');
+    setTimeout(() => addBubble(answer(q), 'bot'), 300);
+  });
+});
+
+/* ============================================================
+   COMMAND PALETTE (dashboard search)
+   ============================================================ */
+const cmdMap = [
+  {keys:["project","architecture","code","redis","prisma"], view:"architecture"},
+  {keys:["github","analytic","repo","language"], view:"analytics"},
+  {keys:["skill","graph","stack"], view:"skills"},
+  {keys:["assistant","ai","chat","ask"], view:"assistant"},
+  {keys:["contact","email","settings","reach"], view:"contact"},
+  {keys:["resume","cv","download"], view:"__resume__"}
+];
+const RESUME_URL = "https://drive.google.com/file/d/1XyJ29Fe9UJudsNCWaeu_dmBo6jMlRQIt/view?usp=sharing";
+const cmdInput = document.getElementById('cmd-input');
+cmdInput.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+  const q = cmdInput.value.toLowerCase().trim();
+  if(!q) return;
+  const match = cmdMap.find(c => c.keys.some(k => q.includes(k)));
+  if(match){
+    if(match.view === "__resume__"){ window.open(RESUME_URL, '_blank'); }
+    else showView(match.view);
+  }
+});
+document.addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); showView('dashboard'); setTimeout(()=>cmdInput.focus(),50); }
+});
+
+/* ============================================================
+   DRAWER
+   ============================================================ */
+const drawerEl = document.getElementById('drawer');
+const scrimEl = document.getElementById('scrim');
+function openDrawer(){ drawerEl.classList.remove('closed'); scrimEl.classList.remove('hidden-scrim'); }
+function closeDrawer(){ drawerEl.classList.add('closed'); scrimEl.classList.add('hidden-scrim'); }
+document.getElementById('drawer-btn').addEventListener('click', openDrawer);
+document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+scrimEl.addEventListener('click', closeDrawer);
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+const bootOverlay = document.getElementById('boot-overlay');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function finishBoot(){ bootOverlay.classList.add('hidden-boot'); sessionStorage.setItem('nexus-booted','1'); }
+if(reduceMotion || sessionStorage.getItem('nexus-booted')){
+  bootOverlay.classList.add('hidden-boot');
+} else {
+  setTimeout(() => { document.getElementById('boot-enter-wrap').style.opacity = '1'; }, 1100);
+  document.getElementById('boot-enter').addEventListener('click', finishBoot);
+}
+
+/* ============================================================
+   INITIAL ROUTE
+   ============================================================ */
+showView(location.hash.replace('#','') || 'dashboard', false);
+
+/* ============================================================
+   BACKGROUND SHADER
+   ============================================================ */
+if(!reduceMotion){
+(function(){
+  const canvas = document.getElementById('shader-canvas');
+  function syncSize(){ const w=canvas.clientWidth||1280,h=canvas.clientHeight||720; if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;} }
+  if(typeof ResizeObserver!=='undefined') new ResizeObserver(syncSize).observe(canvas);
+  syncSize();
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if(!gl) return;
+  const vs = `attribute vec2 a_position; varying vec2 v_texCoord; void main(){ v_texCoord=a_position*0.5+0.5; gl_Position=vec4(a_position,0.0,1.0); }`;
+  const fs = `precision highp float; uniform float u_time; uniform vec2 u_resolution; varying vec2 v_texCoord;
+  float hash(vec2 p){ p=fract(p*vec2(123.34,456.21)); p+=dot(p,p+45.32); return fract(p.x*p.y); }
+  void main(){
+    vec2 uv=v_texCoord; vec2 p=(uv-0.5)*(u_resolution/min(u_resolution.x,u_resolution.y));
+    vec3 color=vec3(0.035,0.035,0.043);
+    for(float i=0.0;i<24.0;i++){
+      float h=hash(vec2(i,i*1.3));
+      vec2 pos=vec2(sin(u_time*0.15+h*6.28), cos(u_time*0.2+h*6.28))*0.42;
+      float d=length(p-pos);
+      color += (1.0-smoothstep(0.0,0.006,d))*vec3(0.23,0.51,0.96)*0.45;
+    }
+    gl_FragColor=vec4(color,1.0);
+  }`;
+  function cs(t,s){ const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); return sh; }
+  const prog=gl.createProgram();
+  gl.attachShader(prog,cs(gl.VERTEX_SHADER,vs)); gl.attachShader(prog,cs(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'a_position'); gl.enableVertexAttribArray(pos); gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'u_time'), uRes=gl.getUniformLocation(prog,'u_resolution');
+  function render(t){
+    if(typeof ResizeObserver==='undefined') syncSize();
+    gl.viewport(0,0,canvas.width,canvas.height);
+    if(uTime) gl.uniform1f(uTime,t*0.001);
+    if(uRes) gl.uniform2f(uRes,canvas.width,canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+}
+</script>
+</body>
+</html>
